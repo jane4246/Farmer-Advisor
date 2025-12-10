@@ -5,15 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Farmer Advisor Chat</title>
 <style>
-  body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 20px; }
-  #chat { width: 400px; height: 500px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; background: #f9f9f9; border-radius: 8px; }
-  .message { margin: 8px 0; padding: 8px 12px; border-radius: 12px; max-width: 80%; word-wrap: break-word; }
-  .user { background-color: #d1e7ff; align-self: flex-end; }
-  .bot { background-color: #d4edda; align-self: flex-start; }
-  .timestamp { font-size: 0.7em; color: #555; margin-top: 2px; }
-  .input-group { display: flex; margin-top: 10px; }
-  #userInput { width: 280px; padding: 8px; }
-  #sendBtn { padding: 8px 12px; margin-left: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+  }
+
+  #chat {
+    width: 400px;
+    height: 500px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+
+  .message {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 80%;
+    word-wrap: break-word;
+  }
+
+  .user {
+    background-color: #d1e7ff;
+    align-self: flex-end;
+  }
+
+  .bot {
+    background-color: #d4edda;
+    align-self: flex-start;
+  }
+
+  .timestamp {
+    font-size: 0.7em;
+    color: #555;
+    margin-top: 2px;
+  }
+
+  .input-group {
+    display: flex;
+    margin-top: 10px;
+  }
+
+  #userInput {
+    width: 280px;
+    padding: 8px;
+  }
+
+  #sendBtn {
+    padding: 8px 12px;
+    margin-left: 5px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  #sendBtn:hover {
+    background: #0056b3;
+  }
 </style>
 </head>
 <body>
@@ -30,44 +85,53 @@ const chatBox = document.getElementById("chat");
 const input = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 
-sendBtn.onclick = sendMessage;
-input.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
+// Optional: generate a persistent session ID
+let sessionId = localStorage.getItem("sessionId");
+if (!sessionId) {
+  sessionId = crypto.randomUUID();
+  localStorage.setItem("sessionId", sessionId);
+}
 
-function sendMessage() {
+sendBtn.onclick = sendMessage;
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+async function sendMessage() {
   const message = input.value.trim();
   if (!message) return;
-  
+
   appendMessage("user", message);
   input.value = "";
 
-  // Simulate AI response
-  setTimeout(() => {
-    const reply = generateReply(message);
-    appendMessage("bot", reply);
-  }, 500); // slight delay to mimic thinking
+  try {
+    const response = await fetch("https://jepkoech.app.n8n.cloud/webhook/keFjOwBAWz4vpiVn", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, sessionId })
+    });
+
+    // Parse JSON response from n8n OpenAI node
+    const data = await response.json();
+
+    // Display the AI reply
+    appendMessage("bot", data.reply);
+
+  } catch (err) {
+    console.error(err);
+    appendMessage("bot", "Assistant is temporarily unavailable.");
+  }
 }
 
 function appendMessage(sender, text) {
   const div = document.createElement("div");
   div.className = "message " + sender;
+
   const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
   div.innerHTML = `${text}<div class="timestamp">${time}</div>`;
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function generateReply(message) {
-  // Example simple logic for responses
-  message = message.toLowerCase();
-  if (message.includes("apple") && message.includes("yellow")) {
-    return "Yellow apple leaves usually mean too much water or nitrogen deficiency. Check soil moisture.";
-  } else if (message.includes("pawpaw") || message.includes("papaya")) {
-    return "For pawpaw, ensure proper spacing, watering, and fertilization for good yield.";
-  } else if (message.includes("payment") || message.includes("buy")) {
-    return "You can pay via Mpesa on +254710558915.";
-  } else {
-    return "Thank you for your question! We will get back with detailed advice. Pay via Mpesa: +254710558915";
-  }
 }
 </script>
 
