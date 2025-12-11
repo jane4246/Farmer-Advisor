@@ -1,6 +1,7 @@
 # App.py
 from flask import Flask, request, jsonify
-from relevanceai.client import Client
+from relevanceai import Client
+
 
 app = Flask(__name__)
 
