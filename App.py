@@ -3,8 +3,8 @@ from relevanceai import RelevanceAIClient
 import os
 
 app = Flask(__name__)
-client = RelevanceAIClient(api_key=os.environ.get("RELEVANCE_AI_KEY"))
-agent_id = "YOUR_AGENT_ID"
+client = RelevanceAIClient(api_key=os.environ.get("sk-ODU0ZTVlMWUtZjQ4My00NWIxLWIxMTYtMDJiYWJlMzM5YjUx    API key"))
+agent_id = "9cf49e03-37cc-4752-9fc1-0c65a8dd5750"
 
 @app.route("/query", methods=["POST"])
 def query():
