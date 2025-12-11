@@ -1,4 +1,3 @@
 flask
-relevanceai==10.2.2
 gunicorn
-
+google-generativeai
