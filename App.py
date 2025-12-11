@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # --- CONFIGURATION & DEBUGGING ---
 # Fetch the key
-GOOGLE_API_KEY = os.getenv("AIzaSyBEfvCU-bj-OvsW4LK4FUKw2qHBy5MPVdw")
+GOOGLE_API_KEY = os.getenv("AIzaSyB3H7sXCbh4oXgUhluogY9GCyNALJ2LUYo")
 
 # PRINT STATUS TO LOGS (Check your Render Logs tab!)
 if not GOOGLE_API_KEY:
