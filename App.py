@@ -3,10 +3,11 @@ from relevanceai import RelevanceAI
 
 app = Flask(__name__)
 
-# Replace these with your actual RelevanceAI credentials
+# RelevanceAI credentials
 RELEVANCE_API_KEY = "sk-NmZjMWExODMtODAwYy00YTlhLWFjZjAtYzU0ZWE3OGNiZmQ4"
-RELEVANCE_PROJECT = "my_fruits_project"  # <-- You must create/get this project from RelevanceAI
+RELEVANCE_PROJECT = "FruitAid"  # Your actual project name
 
+# Initialize RelevanceAI client
 client = RelevanceAI(
     api_key=RELEVANCE_API_KEY,
     project=RELEVANCE_PROJECT,
@@ -22,12 +23,14 @@ def chat():
         return jsonify({"error": "No message provided"}), 400
 
     try:
+        # Create embedding for the user input
         response = client.embeddings.create(
-            dataset="fruits_dataset",  # your dataset
+            dataset="fruits_dataset",  # your dataset inside FruitAid
             records=[{"text": user_input}]
         )
-        output = response["records"][0]["embedding"]
-        return jsonify({"reply": output})
+        # Extract embedding (or you can generate a textual response from a model)
+        output_embedding = response["records"][0]["embedding"]
+        return jsonify({"reply": f"Embedding generated with length {len(output_embedding)}"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
