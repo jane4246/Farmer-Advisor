@@ -1,70 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farm Agent Chat</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-        #chat-container { max-width: 600px; margin: 50px auto; background: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 20px; }
-        #messages { height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-        .message { margin-bottom: 10px; }
-        .user { color: blue; }
-        .bot { color: green; }
-        input[type=text] { width: 80%; padding: 10px; }
-        button { padding: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fruit Agent Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f2f5;
+    }
+    iframe {
+      width: 400px;
+      height: 600px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+  </style>
 </head>
 <body>
-    <div id="chat-container">
-        <h2>Farm Agent Chat</h2>
-        <div id="messages"></div>
-        <input type="text" id="userInput" placeholder="Type your message here...">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-
-    <script>
-        const messagesDiv = document.getElementById('messages');
-        const input = document.getElementById('userInput');
-
-        async function sendMessage() {
-            const message = input.value.trim();
-            if (!message) return;
-
-            // Show user message
-            const userMsgDiv = document.createElement('div');
-            userMsgDiv.classList.add('message', 'user');
-            userMsgDiv.textContent = "You: " + message;
-            messagesDiv.appendChild(userMsgDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            input.value = '';
-
-            try {
-                const response = await fetch('https://jepkoech.app.n8n.cloud/webhook/285f4f8f-16fc-400f-a93a-a582c27003af/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
-                });
-
-                const data = await response.json();
-
-                const botMsgDiv = document.createElement('div');
-                botMsgDiv.classList.add('message', 'bot');
-                botMsgDiv.textContent = "Agent: " + (data.reply || "No response");
-                messagesDiv.appendChild(botMsgDiv);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            } catch (err) {
-                const errDiv = document.createElement('div');
-                errDiv.classList.add('message', 'bot');
-                errDiv.textContent = "Error: " + err.message;
-                messagesDiv.appendChild(errDiv);
-            }
-        }
-
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') sendMessage();
-        });
-    </script>
+  <iframe 
+    src="https://app.relevanceai.com/agents/d7b62b/9cf49e03-37cc-4752-9fc1-0c65a8dd5750/57685344-a115-406c-89cf-30fdd36a5916/embed-chat?hide_tool_steps=false&hide_file_uploads=false&hide_conversation_list=false&bubble_style=agent&primary_color=%23685FFF&bubble_icon=pd%2Fchat&input_placeholder_text=Type+your+message...&hide_logo=false&hide_description=false" 
+    title="Fruit Agent Chat">
+  </iframe>
 </body>
 </html>
