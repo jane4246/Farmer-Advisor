@@ -7,7 +7,7 @@ app = Flask(__name__)
 # --- CONFIGURATION ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# --- FRONTEND ---
+# --- FRONTEND (HTML/CSS/JS) ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -16,53 +16,65 @@ HTML_PAGE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eldoret Orchards AI</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; height: 100vh; background: #eef2f5; margin: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; height: 100vh; background: #eef2f5; margin: 0; }
         .chat-container { width: 100%; max-width: 500px; background: white; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.1); height: 100%; }
-        .chat-header { background: #d32f2f; color: white; padding: 20px; text-align: center; font-weight: bold; }
-        .chat-box { flex: 1; padding: 20px; overflow-y: auto; background-color: #f9f9f9; }
-        .message { padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; max-width: 80%; }
-        .bot { background: #e8f5e9; color: #1b5e20; align-self: flex-start; }
-        .user { background: #2E7D32; color: white; align-self: flex-end; margin-left: auto; }
+        @media(min-width: 600px) { .chat-container { height: 90vh; margin-top: 5vh; border-radius: 12px; overflow: hidden; } }
+        
+        .chat-header { background: #2E7D32; color: white; padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; }
+        
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; background-color: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        
+        .message { padding: 10px 15px; border-radius: 15px; max-width: 80%; line-height: 1.4; font-size: 0.95rem; }
+        .bot { background: #e8f5e9; color: #1b5e20; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .user { background: #2E7D32; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .error { background: #ffebee; color: #c62828; align-self: center; font-size: 0.8rem; }
+
         .input-area { display: flex; padding: 15px; background: #fff; border-top: 1px solid #eee; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; }
-        button { padding: 10px 20px; background: #d32f2f; color: white; border: none; margin-left: 10px; cursor: pointer; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; transition: border 0.3s; }
+        input:focus { border-color: #2E7D32; }
+        button { padding: 10px 20px; background: #2E7D32; color: white; border: none; margin-left: 10px; cursor: pointer; border-radius: 25px; font-weight: bold; transition: background 0.2s; }
+        button:hover { background: #1b5e20; }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">🛠️ Diagnostic Mode</div>
+        <div class="chat-header">🌿 Eldoret Orchards Assistant</div>
         <div class="chat-box" id="chat-box">
-            <div class="message bot">I am in Diagnostic Mode. Type anything to test the connection.</div>
+            <div class="message bot">Hello! I am your AI assistant for fruit farming. Ask me about avocados, mangoes, or pests!</div>
         </div>
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Type 'test'..." onkeypress="handleEnter(event)">
-            <button onclick="sendMessage()">Test</button>
+            <input type="text" id="user-input" placeholder="Ask a question..." onkeypress="handleEnter(event)">
+            <button onclick="sendMessage()">Send</button>
         </div>
     </div>
+
     <script>
         async function sendMessage() {
             const input = document.getElementById("user-input");
             const text = input.value.trim();
             if (!text) return;
-            
+
             addMessage(text, "user");
             input.value = "";
-            
-            const response = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: text })
-            });
-            const data = await response.json();
-            
-            // If we get a debug list, format it nicely
-            if (data.debug_info) {
-                 addMessage("⚠️ CONNECTION FAILED. Google says you have access to these models:", "bot");
-                 addMessage(data.debug_info, "bot");
-            } else {
-                 addMessage(data.reply || data.error, "bot");
+
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await response.json();
+                
+                if (data.reply) {
+                    addMessage(data.reply, "bot");
+                } else {
+                    addMessage("Error: " + (data.error || "Unknown error"), "error");
+                }
+            } catch (err) {
+                addMessage("Failed to connect to server.", "error");
             }
         }
+
         function addMessage(text, sender) {
             const box = document.getElementById("chat-box");
             const div = document.createElement("div");
@@ -71,11 +83,14 @@ HTML_PAGE = """
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         }
+
         function handleEnter(e) { if (e.key === "Enter") sendMessage(); }
     </script>
 </body>
 </html>
 """
+
+# --- ROUTES ---
 
 @app.route("/")
 def home():
@@ -84,41 +99,38 @@ def home():
 @app.route("/chat", methods=["POST"])
 def chat():
     if not GOOGLE_API_KEY:
-        return jsonify({"error": "API Key missing."}), 500
+        return jsonify({"error": "Server Error: API Key missing."}), 500
         
     user_input = request.json.get("message")
-
-    # 1. Try to generate content using 'gemini-1.5-flash'
-    target_model = "gemini-1.5-flash"
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{target_model}:generateContent?key={GOOGLE_API_KEY}"
+    if not user_input:
+        return jsonify({"error": "Empty message"}), 400
     
-    payload = { "contents": [{ "parts": [{ "text": user_input }] }] }
+    # 1. USING THE MODEL FROM YOUR DIAGNOSTIC LIST: 'gemini-2.0-flash'
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GOOGLE_API_KEY}"
+    
+    # 2. System Instruction + User Question
+    system_prompt = "You are a friendly expert for Eldoret Orchards. Answer fruit farming questions concisely."
+    
+    payload = {
+        "contents": [{
+            "parts": [{
+                "text": f"{system_prompt}\n\nUser Question: {user_input}"
+            }]
+        }]
+    }
 
     try:
         response = requests.post(url, json=payload)
         
         if response.status_code == 200:
-            # IT WORKED!
-            return jsonify({"reply": response.json()['candidates'][0]['content']['parts'][0]['text']})
-        
+            result = response.json()
+            try:
+                bot_reply = result['candidates'][0]['content']['parts'][0]['text']
+                return jsonify({"reply": bot_reply})
+            except (KeyError, IndexError):
+                 return jsonify({"reply": "I couldn't generate a response. Please try asking differently."})
         else:
-            # 2. IF IT FAILED (404), ASK GOOGLE FOR THE LIST OF AVAILABLE MODELS
-            list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={GOOGLE_API_KEY}"
-            list_response = requests.get(list_url)
-            
-            if list_response.status_code == 200:
-                # We got the list! Let's show it to the user.
-                models = list_response.json().get('models', [])
-                model_names = [m['name'] for m in models]
-                
-                debug_msg = " | ".join(model_names)
-                return jsonify({
-                    "error": f"Model {target_model} failed.",
-                    "debug_info": f"AVAILABLE MODELS: {debug_msg}"
-                })
-            else:
-                # Even listing failed. The key is broken.
-                return jsonify({"error": f"CRITICAL: Key rejected. Google said: {list_response.text}"})
+            return jsonify({"error": f"Google Error ({response.status_code}): {response.text}"}), response.status_code
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
