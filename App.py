@@ -20,7 +20,7 @@ def chat():
     # Replace with the actual agent logic you need
     try:
         response = client.embeddings.create(
-            dataset="your_dataset_name",  # your dataset
+            dataset="fruits_dataset",  # your dataset
             records=[{"text": user_input}]
         )
         # Send back the embedding or some processed result
