@@ -5,28 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fruit Agent Chat</title>
   <style>
-    body {
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f0f2f5;
+      background-color: #f0f0f0;
     }
     iframe {
-      width: 400px;
-      height: 600px;
+      width: 100%;
+      max-width: 600px;
+      height: 700px;
       border: none;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
   <iframe 
-    src="https://app.relevanceai.com/agents/d7b62b/9cf49e03-37cc-4752-9fc1-0c65a8dd5750/57685344-a115-406c-89cf-30fdd36a5916/embed-chat?hide_tool_steps=false&hide_file_uploads=false&hide_conversation_list=false&bubble_style=agent&primary_color=%23685FFF&bubble_icon=pd%2Fchat&input_placeholder_text=Type+your+message...&hide_logo=false&hide_description=false" 
-    title="Fruit Agent Chat">
+    src="https://app.relevanceai.com/agents/d7b62b/9cf49e03-37cc-4752-9fc1-0c65a8dd5750/57685344-a115-406c-89cf-30fdd36a5916/embed-chat?hide_tool_steps=false&hide_file_uploads=false&hide_conversation_list=false&bubble_style=agent&primary_color=%23685FFF&bubble_icon=pd%2Fchat&input_placeholder_text=Type+your+message...&hide_logo=false&hide_description=false"
+    allow="microphone; autoplay">
   </iframe>
 </body>
 </html>
