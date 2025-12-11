@@ -1,13 +1,15 @@
-# App.py
 from flask import Flask, request, jsonify
 from relevanceai import RelevanceAI
 
 app = Flask(__name__)
 
-# Initialize Relevance AI client with your API key and region
-RELEVANCE_API_KEY = "sk-NmZjMWExODMtODAwYy00YTlhLWFjZjAtYzU0ZWE3OGNiZmQ4"  # replace with your actual key
+# Replace these with your actual RelevanceAI credentials
+RELEVANCE_API_KEY = "sk-NmZjMWExODMtODAwYy00YTlhLWFjZjAtYzU0ZWE3OGNiZmQ4"
+RELEVANCE_PROJECT = "my_fruits_project"  # <-- You must create/get this project from RelevanceAI
+
 client = RelevanceAI(
     api_key=RELEVANCE_API_KEY,
+    project=RELEVANCE_PROJECT,
     region="us-west"  # Oregon region
 )
 
@@ -19,13 +21,11 @@ def chat():
     if not user_input:
         return jsonify({"error": "No message provided"}), 400
 
-    # Example: using the Relevance AI embeddings endpoint
     try:
         response = client.embeddings.create(
             dataset="fruits_dataset",  # your dataset
             records=[{"text": user_input}]
         )
-        # Send back the embedding or some processed result
         output = response["records"][0]["embedding"]
         return jsonify({"reply": output})
     except Exception as e:
