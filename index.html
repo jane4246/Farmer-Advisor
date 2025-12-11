@@ -1,45 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fruit Agent</title>
+  <meta charset="UTF-8">
+  <title>Fruit Farming Advisor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { 
-      font-family: system-ui; 
-      background: #f7f7ff; 
-      margin: 0; 
-      padding: 40px; 
-      display: flex; 
-      justify-content: center; 
+    body {
+      font-family: system-ui;
+      background: #f7f7ff;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
     }
-    .card {
+    .chat-container {
       background: white;
       width: 100%;
       max-width: 480px;
       padding: 24px;
       border-radius: 16px;
       box-shadow: 0px 8px 24px rgba(0,0,0,0.1);
-    }
-    h2 { margin-top: 0; color: #453aff; text-align: center; }
-    iframe {
-      width: 100%;
+      display: flex;
+      flex-direction: column;
       height: 600px;
-      border: none;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 12px;
+    }
+    .message {
+      padding: 8px 12px;
       border-radius: 12px;
+      margin-bottom: 8px;
+      max-width: 80%;
+    }
+    .user { background: #e0e0ff; align-self: flex-end; }
+    .bot { background: #685fff; color: white; align-self: flex-start; }
+    input {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      width: calc(100% - 26px);
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>Fruit Farming Advisor</h2>
+<div class="chat-container">
+  <div class="messages" id="messages"></div>
+  <input type="text" id="input" placeholder="Type your message..." />
+</div>
 
-    <iframe 
-      src="https://app.relevanceai.com/agents/d7b62b/9cf49e03-37cc-4752-9fc1-0c65a8dd5750/57685344-a115-406c-89cf-30fdd36a5916/embed-chat?hide_tool_steps=false&hide_file_uploads=false&hide_conversation_list=false&bubble_style=agent&primary_color=%23685FFF&bubble_icon=pd%2Fchat&input_placeholder_text=Type+your+message...&hide_logo=false&hide_description=false"
-      allow="clipboard-read; clipboard-write;">
-    </iframe>
-  </div>
+<script>
+  const messagesDiv = document.getElementById("messages");
+  const input = document.getElementById("input");
+
+  function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = "message " + sender;
+    msg.textContent = text;
+    messagesDiv.appendChild(msg);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  input.addEventListener("keydown", async (e) => {
+    if (e.key === "Enter" && input.value.trim() !== "") {
+      const text = input.value.trim();
+      addMessage(text, "user");
+      input.value = "";
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      addMessage(data.reply, "bot");
+    }
+  });
+</script>
 
 </body>
 </html>
