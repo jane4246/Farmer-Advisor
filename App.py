@@ -7,7 +7,7 @@ app = Flask(__name__)
 # --- CONFIGURATION ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# --- FRONTEND (Your Chat Interface) ---
+# --- FRONTEND ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -86,11 +86,9 @@ def chat():
         
     user_input = request.json.get("message")
     
-    # 1. Direct URL to Google's API (Bypassing the buggy library)
-    # using 'gemini-1.5-flash' which is the current fast/free model
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
+    # --- FIX: SWITCHED TO 'gemini-pro' (The Standard Model) ---
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GOOGLE_API_KEY}"
     
-    # 2. Construct the JSON payload manually
     payload = {
         "contents": [{
             "parts": [{
@@ -100,18 +98,17 @@ def chat():
     }
 
     try:
-        # 3. Send Request
         response = requests.post(url, json=payload)
         
-        # 4. Check if successful
         if response.status_code == 200:
             result = response.json()
-            # Extract text from complex Google JSON structure
-            bot_reply = result['candidates'][0]['content']['parts'][0]['text']
-            return jsonify({"reply": bot_reply})
+            try:
+                bot_reply = result['candidates'][0]['content']['parts'][0]['text']
+                return jsonify({"reply": bot_reply})
+            except (KeyError, IndexError):
+                 return jsonify({"reply": "I understood the question but couldn't think of an answer. Please try again."})
         else:
-            # If Google returns an error (like 400 or 403), show it
-            return jsonify({"error": f"Google Error: {response.text}"}), response.status_code
+            return jsonify({"error": f"Google Error ({response.status_code}): {response.text}"}), response.status_code
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
