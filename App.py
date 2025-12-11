@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Initialize Relevance AI client with your API key
 RELEVANCE_API_KEY = "sk-NmZjMWExODMtODAwYy00YTlhLWFjZjAtYzU0ZWE3OGNiZmQ4"  # replace with your actual key
-client = Client(api_key=RELEVANCE_API_KEY)
+client = RelevanceAI(api_key=RELEVANCE_API_KEY)
 
 @app.route("/chat", methods=["POST"])
 def chat():
