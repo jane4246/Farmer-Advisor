@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # --- CONFIGURATION ---
 # Get this key from https://aistudio.google.com/app/apikey
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = os.getenv("AIzaSyBEfvCU-bj-OvsW4LK4FUKw2qHBy5MPVdw")
 
 # Configure Gemini
 if GOOGLE_API_KEY:
