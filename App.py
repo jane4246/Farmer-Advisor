@@ -7,7 +7,7 @@ app = Flask(__name__)
 # --- CONFIGURATION ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# --- FRONTEND (HTML/CSS/JS) ---
+# --- FRONTEND ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +16,7 @@ HTML_PAGE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eldoret Orchards AI</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; height: 100vh; background: #eef2f5; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; height: 100vh; background: #eef2f5; margin: 0; }
         .chat-container { width: 100%; max-width: 500px; background: white; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.1); height: 100%; }
         @media(min-width: 600px) { .chat-container { height: 90vh; margin-top: 5vh; border-radius: 12px; overflow: hidden; } }
         
@@ -25,15 +25,13 @@ HTML_PAGE = """
         .chat-box { flex: 1; padding: 20px; overflow-y: auto; background-color: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
         
         .message { padding: 10px 15px; border-radius: 15px; max-width: 80%; line-height: 1.4; font-size: 0.95rem; }
-        .bot { background: #e8f5e9; color: #1b5e20; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .user { background: #2E7D32; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .bot { background: #e8f5e9; color: #1b5e20; align-self: flex-start; }
+        .user { background: #2E7D32; color: white; align-self: flex-end; }
         .error { background: #ffebee; color: #c62828; align-self: center; font-size: 0.8rem; }
 
         .input-area { display: flex; padding: 15px; background: #fff; border-top: 1px solid #eee; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; transition: border 0.3s; }
-        input:focus { border-color: #2E7D32; }
-        button { padding: 10px 20px; background: #2E7D32; color: white; border: none; margin-left: 10px; cursor: pointer; border-radius: 25px; font-weight: bold; transition: background 0.2s; }
-        button:hover { background: #1b5e20; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
+        button { padding: 10px 20px; background: #2E7D32; color: white; border: none; margin-left: 10px; cursor: pointer; border-radius: 25px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -105,10 +103,10 @@ def chat():
     if not user_input:
         return jsonify({"error": "Empty message"}), 400
     
-    # 1. USING THE MODEL FROM YOUR DIAGNOSTIC LIST: 'gemini-2.0-flash'
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GOOGLE_API_KEY}"
+    # --- FIX: USING THE STABLE ALIAS 'gemini-flash-latest' ---
+    # This automatically picks the best available Flash model for your account
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GOOGLE_API_KEY}"
     
-    # 2. System Instruction + User Question
     system_prompt = "You are a friendly expert for Eldoret Orchards. Answer fruit farming questions concisely."
     
     payload = {
