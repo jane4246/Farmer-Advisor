@@ -1,4 +1,4 @@
 flask
-relevanceai
+relevanceai==8.6.1
 gunicorn
 
