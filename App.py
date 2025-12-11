@@ -4,9 +4,12 @@ from relevanceai import RelevanceAI
 
 app = Flask(__name__)
 
-# Initialize Relevance AI client with your API key
+# Initialize Relevance AI client with your API key and region
 RELEVANCE_API_KEY = "sk-NmZjMWExODMtODAwYy00YTlhLWFjZjAtYzU0ZWE3OGNiZmQ4"  # replace with your actual key
-client = RelevanceAI(api_key=RELEVANCE_API_KEY)
+client = RelevanceAI(
+    api_key=RELEVANCE_API_KEY,
+    region="us-west"  # Oregon region
+)
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -17,7 +20,6 @@ def chat():
         return jsonify({"error": "No message provided"}), 400
 
     # Example: using the Relevance AI embeddings endpoint
-    # Replace with the actual agent logic you need
     try:
         response = client.embeddings.create(
             dataset="fruits_dataset",  # your dataset
