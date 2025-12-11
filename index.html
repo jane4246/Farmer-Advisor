@@ -1,78 +1,413 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Farmer Advisor Chat</title>
-<style>
-  body { font-family: Arial; display: flex; flex-direction: column; align-items: center; margin: 20px; }
-  #chat { width: 400px; height: 500px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; background: #f9f9f9; border-radius: 8px; }
-  .message { margin: 8px 0; padding: 8px 12px; border-radius: 12px; max-width: 80%; word-wrap: break-word; }
-  .user { background-color: #d1e7ff; align-self: flex-end; }
-  .bot { background-color: #d4edda; align-self: flex-start; }
-  .timestamp { font-size: 0.7em; color: #555; margin-top: 2px; }
-  .input-group { display: flex; margin-top: 10px; }
-  #userInput { width: 280px; padding: 8px; }
-  #sendBtn { padding: 8px 12px; margin-left: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
-  #sendBtn:hover { background: #0056b3; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriBot Agent</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary: #2e7d32; /* Farm Green */
+            --bg: #f3f4f6;
+            --chat-bg: #e5e7eb;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--white);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        header h1 { margin: 0; font-size: 1.2rem; font-weight: 500; }
+
+        /* CHAT AREA */
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .message.user { align-self: flex-end; align-items: flex-end; }
+        .message.ai { align-self: flex-start; }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+        }
+
+        .message.user .bubble {
+            background: var(--primary);
+            color: var(--white);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai .bubble {
+            background: var(--white);
+            color: #1f2937;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .msg-img {
+            max-width: 200px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* PREVIEW AREA */
+        .preview-area {
+            padding: 10px 15px;
+            background: #f0fdf4;
+            border-top: 1px solid #dcfce7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #166534;
+        }
+        .hidden { display: none !important; }
+
+        /* INPUT AREA */
+        .input-area {
+            padding: 10px;
+            background: var(--white);
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-upload-label {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            color: #555;
+            transition: background 0.2s;
+        }
+        .file-upload-label:hover { background: #f3f4f6; }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 24px;
+            outline: none;
+            font-size: 16px;
+            background: #f9fafb;
+        }
+        input[type="text"]:focus { border-color: var(--primary); background: #fff; }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .icon-btn:hover { background: #f3f4f6; }
+        
+        .icon-btn.recording {
+            color: #ef4444;
+            background: #fee2e2;
+            animation: pulse 1.5s infinite;
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .send-btn:active { transform: scale(0.95); }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
 
-<h2>Farmer Advisor</h2>
-<div id="chat"></div>
-<div class="input-group">
-  <input type="text" id="userInput" placeholder="Ask a farming question...">
-  <button id="sendBtn">Send</button>
-</div>
+    <div class="app-container">
+        <header>
+            <h1>🌾 AgriBot Agent</h1>
+        </header>
 
-<script>
-const chatBox = document.getElementById("chat");
-const input = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
+        <div id="chat-window">
+            <div class="message ai">
+                <div class="bubble">
+                    Hello! I am your AI Agricultural Assistant. 🌿<br><br>
+                    • Ask me about crops or pests.<br>
+                    • <b>Upload a photo</b> of a sick plant for diagnosis.
+                </div>
+            </div>
+        </div>
 
-// Optional: persistent session
-let sessionId = localStorage.getItem("sessionId");
-if (!sessionId) {
-  sessionId = crypto.randomUUID();
-  localStorage.setItem("sessionId", sessionId);
-}
+        <div id="preview-area" class="preview-area hidden">
+            <div style="display:flex; align-items:center; gap:5px;">
+                <span class="material-icons" style="font-size:18px;">attachment</span>
+                <span id="preview-text">File selected</span>
+            </div>
+            <button id="clear-file-btn" style="background:none; border:none; color:#166534; cursor:pointer;">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
 
-sendBtn.onclick = sendMessage;
-input.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+        <div class="input-area">
+            <label class="file-upload-label">
+                <span class="material-icons">add_a_photo</span>
+                <input type="file" id="image-input" accept="image/*" capture="environment" hidden>
+            </label>
 
-async function sendMessage() {
-  const message = input.value.trim();
-  if (!message) return;
+            <input type="text" id="text-input" placeholder="Type a question...">
 
-  appendMessage("user", message);
-  input.value = "";
+            <button id="mic-btn" class="icon-btn">
+                <span class="material-icons">mic</span>
+            </button>
 
-  try {
-    const response = await fetch("https://jepkoech.app.n8n.cloud/webhook/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, sessionId })
-    });
+            <button id="send-btn" class="send-btn">
+                <span class="material-icons">send</span>
+            </button>
+        </div>
+    </div>
 
-    const data = await response.json();
-    appendMessage("bot", data.reply);
+    <script>
+        // ==========================================
+        //  UPDATED WITH YOUR URL
+        // ==========================================
+        const N8N_WEBHOOK_URL = 'https://jepkoech.app.n8n.cloud/webhook/agribot-diagnosis'; 
+        // ==========================================
 
-  } catch (err) {
-    console.error(err);
-    appendMessage("bot", "Assistant is temporarily unavailable.");
-  }
-}
+        const chatWindow = document.getElementById('chat-window');
+        const textInput = document.getElementById('text-input');
+        const sendBtn = document.getElementById('send-btn');
+        const micBtn = document.getElementById('mic-btn');
+        const imageInput = document.getElementById('image-input');
+        const previewArea = document.getElementById('preview-area');
+        const previewText = document.getElementById('preview-text');
+        const clearFileBtn = document.getElementById('clear-file-btn');
 
-function appendMessage(sender, text) {
-  const div = document.createElement("div");
-  div.className = "message " + sender;
-  const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  div.innerHTML = `${text}<div class="timestamp">${time}</div>`;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-</script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob = null;
+        let selectedImage = null;
+        let isRecording = false;
 
+        function scrollToBottom() {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function addMessage(text, sender, imageUrl = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+
+            if (imageUrl) {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.classList.add('msg-img');
+                msgDiv.appendChild(img);
+            }
+
+            if (text) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                let formatted = text
+                    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                    .replace(/\n/g, '<br>');
+                bubble.innerHTML = formatted;
+                msgDiv.appendChild(bubble);
+            }
+
+            chatWindow.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                selectedImage = e.target.files[0];
+                previewText.textContent = `Image: ${selectedImage.name.substring(0, 15)}...`;
+                previewArea.classList.remove('hidden');
+                textInput.placeholder = "Add a caption (optional)...";
+            }
+        });
+
+        clearFileBtn.addEventListener('click', () => {
+            selectedImage = null;
+            audioBlob = null;
+            imageInput.value = '';
+            previewArea.classList.add('hidden');
+            textInput.placeholder = "Type a question...";
+        });
+
+        ['mousedown', 'touchstart'].forEach(evt => 
+            micBtn.addEventListener(evt, startRecording)
+        );
+        ['mouseup', 'touchend'].forEach(evt => 
+            micBtn.addEventListener(evt, stopRecording)
+        );
+
+        async function startRecording(e) {
+            if (e.type === 'touchstart') e.preventDefault();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    previewText.textContent = "🎤 Voice Note Recorded";
+                    previewArea.classList.remove('hidden');
+                    textInput.placeholder = "Voice recorded. Press send.";
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                micBtn.classList.add('recording');
+            } catch (err) {
+                console.error("Mic Error:", err);
+                alert("Microphone access denied. Please allow permissions.");
+            }
+        }
+
+        function stopRecording(e) {
+            if (isRecording && mediaRecorder) {
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        async function sendMessage() {
+            const text = textInput.value.trim();
+            if (!text && !audioBlob && !selectedImage) return;
+
+            let displayImg = selectedImage ? URL.createObjectURL(selectedImage) : null;
+            let displayText = text || (audioBlob ? "🎤 [Voice Message]" : "");
+            addMessage(displayText, 'user', displayImg);
+
+            const formData = new FormData();
+            if (text) formData.append('text', text);
+            if (audioBlob) formData.append('audio', audioBlob, 'recording.webm');
+            if (selectedImage) formData.append('image', selectedImage, selectedImage.name);
+
+            textInput.value = '';
+            selectedImage = null;
+            audioBlob = null;
+            imageInput.value = '';
+            previewArea.classList.add('hidden');
+            textInput.placeholder = "Type a question...";
+
+            const loadingId = 'loading-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.classList.add('message', 'ai');
+            loadingDiv.innerHTML = `<div class="bubble"><span class="loader"></span> Analyzing...</div>`;
+            chatWindow.appendChild(loadingDiv);
+            scrollToBottom();
+
+            try {
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Server Error");
+
+                const data = await response.json();
+                document.getElementById(loadingId).remove();
+                
+                // Flexible check for different n8n output formats
+                const reply = data.text || data.output || data.message || (typeof data === 'string' ? data : JSON.stringify(data));
+                addMessage(reply, 'ai');
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById(loadingId).remove();
+                addMessage("⚠️ Error: Could not reach the agent.", 'ai');
+            }
+        }
+    </script>
 </body>
 </html>
