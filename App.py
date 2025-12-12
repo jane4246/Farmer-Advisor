@@ -5,10 +5,10 @@ from flask import Flask, request, jsonify, render_template_string
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
-# We are now using Groq (Free & Fast)
+# Ensure you have GROQ_API_KEY set in Render Environment
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# --- FRONTEND (Same Beautiful Interface) ---
+# --- FRONTEND ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -115,11 +115,11 @@ def chat():
         "Content-Type": "application/json"
     }
     
-    # System prompt to make it an expert
     system_prompt = "You are a helpful agricultural expert for Eldoret Orchards in Kenya. Provide concise advice on growing avocados, mangoes, and passion fruit."
 
     payload = {
-        "model": "llama3-8b-8192", # Free, fast, and smart model
+        # UPDATED MODEL NAME HERE:
+        "model": "llama-3.3-70b-versatile", 
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_input}
